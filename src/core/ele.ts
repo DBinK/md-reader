@@ -1,4 +1,4 @@
-export type ElementType = HTMLElement | SVGSVGElement | DocumentFragment
+export type ElementType = HTMLElement | SVGSVGElement | DocumentFragment | Text
 export type Attrs = { className?: string | string[] } | { [k: string]: string }
 export type EleType = ElementType | Ele | string
 
@@ -7,7 +7,7 @@ export default class Ele<T extends ElementType = ElementType> {
   protected display: string
 
   static create<T extends ElementType>(tagName: string, attrs: Attrs = {}): T {
-    let { className, ...restAttrs } = attrs
+    const { className, ...restAttrs } = attrs
     let ele: T
 
     if (tagName === 'svg') {
@@ -20,7 +20,7 @@ export default class Ele<T extends ElementType = ElementType> {
     } else {
       ;(ele as HTMLElement) = document.createElement(tagName)
     }
-    if (!isFragment(ele)) {
+    if (!isFragment(ele) && !isText(ele)) {
       Ele.addClassName(ele, className)
       for (const key in restAttrs) {
         ele.setAttribute(key, restAttrs[key])
@@ -50,22 +50,24 @@ export default class Ele<T extends ElementType = ElementType> {
       : node
   }
 
-  constructor(element: T, attrs?: Attrs, children?: EleType | EleType[])
-  constructor(tagName: string, attrs?: Attrs, children?: EleType | EleType[])
-  constructor(tagName: string | T, attrs?: Attrs, children?: any) {
+  constructor(
+    tagName: string | T,
+    attrs?: Attrs,
+    children: EleType | EleType[] = [],
+  ) {
     if (typeof tagName !== 'string') {
       this.ele = tagName
     } else {
       this.ele = Ele.create<T>(tagName, attrs)
     }
-    children && this.append(children)
+    Array.isArray(children) ? this.append(children) : this.append(children)
   }
 
   get classList(): DOMTokenList {
-    return isFragment(this.ele) ? null : this.ele.classList
+    return isFragment(this.ele) || isText(this.ele) ? null : this.ele.classList
   }
   get style(): CSSStyleDeclaration {
-    return isFragment(this.ele) ? null : this.ele.style
+    return isFragment(this.ele) || isText(this.ele) ? null : this.ele.style
   }
   get src(): string {
     return isImg(this.ele) ? this.ele.src : undefined
@@ -76,7 +78,7 @@ export default class Ele<T extends ElementType = ElementType> {
     }
   }
   set innerHTML(content: string) {
-    if (!isFragment(this.ele)) {
+    if (!isFragment(this.ele) && !isText(this.ele)) {
       this.ele.innerHTML = content
     }
   }
@@ -85,10 +87,10 @@ export default class Ele<T extends ElementType = ElementType> {
   }
 
   query(selectors: string): Element | null {
-    return this.ele.querySelector(selectors)
+    return isText(this.ele) ? null : this.ele.querySelector(selectors)
   }
   queryAll(selectors: string): HTMLElement[] {
-    if (this instanceof Text) {
+    if (isText(this.ele)) {
       return
     }
     return Array.from(this.ele.querySelectorAll(selectors))
@@ -124,9 +126,9 @@ export default class Ele<T extends ElementType = ElementType> {
     Object.assign(this.style, style)
     return this.style
   }
-  append(newChild: string | string[]): Text | Text[]
-  append(newChild: EleType | EleType[]): ElementType | ElementType[]
-  append(newChild: any): any {
+  append(newChild: EleType): ElementType
+  append(newChild: EleType[]): ElementType[]
+  append(newChild: EleType | EleType[]): ElementType | ElementType[] {
     return Array.isArray(newChild)
       ? newChild.map(child => this.append(child))
       : this.ele.appendChild(Ele.from(newChild))
@@ -177,6 +179,9 @@ export default class Ele<T extends ElementType = ElementType> {
 
 function isFragment(element: EleType): element is DocumentFragment {
   return element instanceof DocumentFragment
+}
+function isText(element: EleType): element is Text {
+  return element instanceof Text
 }
 
 function isImg(element: EleType): element is HTMLImageElement {

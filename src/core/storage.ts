@@ -1,6 +1,6 @@
 import type { Data } from './data'
 
-class Storage<T extends object> {
+class Storage<T extends object = Data> {
   local: chrome.storage.LocalStorageArea
   constructor() {
     this.local = chrome.storage.local
@@ -9,8 +9,8 @@ class Storage<T extends object> {
    * Set data to storage
    */
   set(data: T): Promise<T>
-  set(key: keyof T, value: any): Promise<T>
-  set(data: unknown, value?: any) {
+  set<K extends keyof T>(key: K, value: T[K]): Promise<T>
+  set(data: keyof T | T, value?: unknown) {
     if (typeof data === 'string') {
       return this.setObjData(<T>{
         [data]: value,
@@ -35,4 +35,4 @@ class Storage<T extends object> {
   }
 }
 
-export default new Storage<Data>()
+export default new Storage()

@@ -1,14 +1,19 @@
 import fs from 'fs/promises'
 import prettier from 'prettier'
-import { url, log, newVersion } from './utils.mjs'
+import { url, log, version } from './utils.mjs'
 
 const manifestPath = url('../src/manifest.json')
+const digitalVersion = version
+  .split('.')
+  .map(n => parseInt(n))
+  .join('.')
 
 try {
   const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf-8'))
+  manifest.version_name = version
   log.blue(
     `📃[update manifest version]: ${manifest.version} ==> ${(manifest.version =
-      newVersion)}`,
+      digitalVersion)}`,
   )
   await fs.writeFile(
     manifestPath,

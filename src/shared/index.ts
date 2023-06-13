@@ -1,8 +1,8 @@
 import Ele from '@/core/ele'
 import themeTypes, { themePrefix, type Theme } from '@/config/page-themes'
 
-export const HEAD = document.head
-export const BODY = document.body
+export const HEAD = globalThis.document?.head
+export const BODY = globalThis.document?.body
 export const RAW_SELECTOR = 'pre'
 export const HEADERS = 'h1, h2, h3, h4, h5, h6'
 export const CONTENT_TYPES = ['text/plain', 'text/markdown']
@@ -10,13 +10,13 @@ export const mdFilePathPattern = /\.(mdx?|mkd|markdown)$/i
 export const extPattern =
   /\.(html|jsonc?|vue|s?css|less|ya?ml|(?:c|m)?(?:j|t)sx?)$/i
 export const dirPathPattern = /^file:\/\/(.*\/)+$/
-export const isDirRoot = dirPathPattern.test(window.location.href)
-export let dirPath = document.location.pathname
-if (!dirPath.endsWith('/')) {
+export const isDirRoot = dirPathPattern.test(globalThis.window?.location.href)
+export let dirPath = globalThis.document?.location.pathname
+if (!dirPath?.endsWith('/')) {
   dirPath += '/'
 }
 
-export const darkMediaQuery: MediaQueryList = window.matchMedia(
+export const darkMediaQuery: MediaQueryList = globalThis.window?.matchMedia(
   '(prefers-color-scheme: dark)',
 )
 
@@ -104,7 +104,7 @@ export function setTheme(themeType: Theme) {
 
 export function xhr(
   url: string,
-  method: string = 'GET',
+  method = 'GET',
   body?: Document | XMLHttpRequestBodyInit,
 ): Promise<EventTarget> {
   return new Promise((resolve, reject) => {

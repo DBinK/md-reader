@@ -17,5 +17,5 @@
       "@md-reader/*": ["node_modules/@md-reader/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "scripts"]
 }

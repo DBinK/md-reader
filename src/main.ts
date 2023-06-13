@@ -72,10 +72,10 @@ async function main(data: Data) {
   }
 
   let pollingTimer: number = null
-  let reloading: boolean = false
+  let reloading = false
   let mdRaw: string = null
-  let isSideHover: boolean = false
-  let globalEvent: Event = new Event()
+  let isSideHover = false
+  const globalEvent: Event = new Event()
 
   initPlugins({ event: globalEvent })
 
@@ -104,7 +104,7 @@ async function main(data: Data) {
 
   const mdRenderer =
     (target: HTMLElement | Ele) =>
-    (code: string = '', options?: MdOptions) => {
+    (code = '', options?: MdOptions) => {
       target.innerHTML = mdRender(code, {
         theme: toTheme(configData.pageTheme),
         plugins: configData.mdPlugins,
@@ -152,6 +152,9 @@ async function main(data: Data) {
   mdSide.on('click', async (e: MouseEvent) => {
     const target = e.target as HTMLElement
     if (target && target.tagName === 'A') {
+      if (!isDirRoot) {
+        return
+      }
       e.preventDefault()
       const target = e.target as HTMLAnchorElement
       const href = target.dataset.href
